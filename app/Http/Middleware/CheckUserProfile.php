@@ -16,13 +16,14 @@ class CheckUserProfile
      */
     public function handle(Request $request, Closure $next)
     {   
-        $response = ['status'=>1, "msg"=>""];
+        $response = ['status'=>1, "msg"=>[]];
 
         $user = $request->user();
 
         if ($user->role == "Administrador") {
+            $response['status'] = 0;
             $response['msg']['info'] = 'No tienes permisos';
-            return response()->json($response);
+            return response()->json($response,401);
         }else{
             return $next($request);
         }
