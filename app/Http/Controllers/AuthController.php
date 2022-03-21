@@ -147,7 +147,6 @@ class AuthController extends Controller
                 $user->google_id = $auth_user->id;
                 $user->name = $auth_user->name;
                 $user->email = $auth_user->email;
-                $user->password = Hash::make('password');
                 $user->save();
 
                 $token = $user->createToken('auth_token')->plainTextToken;
@@ -158,10 +157,15 @@ class AuthController extends Controller
 
                 return response()->json($response, 200);
             } else {
-                $response['msg'] = "Ha Ocurrido un Error";
-                $response['status'] = 0;
+                $user = User::where('email',$auth_user->email)->first();
+                $user->tokens()->delete();
+                $token = $user->createToken('auth_token')->plainTextToken;
 
-                return response()->json($response, 400);
+                $response['msg'] = "Usuario Guardado Correctamente";
+                $response['token'] = $token;
+                $response['status'] = 1;
+
+                return response()->json($response, 200);
             }
         } catch (\Exception $e) {
             $response['msg'] = (env('APP_DEBUG') == "true" ? $e->getMessage() : $this->error);
