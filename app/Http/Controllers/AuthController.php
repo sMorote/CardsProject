@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -95,6 +96,78 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Not find email in database'
             ], 404);
+        }
+    }
+
+     /**
+     * Redirect To Google OAuth
+     * 
+     * @param nil
+     * @return response()->json($response, http_status_code)
+     */
+    public function loginRedirect()
+    {
+        $response = ["status" => 1, "msg" => ""];
+
+        try {
+            $googleAuthScopes = [
+                'https://www.googleapis.com/auth/userinfo.email',
+                'https://www.googleapis.com/auth/userinfo.profile',
+            ];
+
+            $response['msg'] = Socialite::driver('google')->scopes($googleAuthScopes)->redirect()->getTargetUrl();
+            $response['status'] = 1;
+
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response['msg'] = (env('APP_DEBUG') == "true" ? $e->getMessage() : $this->error);
+            $response['status'] = 0;
+
+            return response()->json($response, 500);
+        }
+    }
+
+    /**
+     * Get oAuth Data
+     * 
+     * @param nil
+     * @return response()->json($response, http_status_code)
+     */
+    public function loginCall()
+    {
+        $response = ["status" => 1, "msg" => ""];
+
+        try {
+            $auth_user = Socialite::driver('google')->stateless()->user();
+
+            $dbUser = User::where('email', $auth_user->email)->first();
+
+            if (!$dbUser) {
+                $user = new User();
+                $user->google_id = $auth_user->id;
+                $user->name = $auth_user->name;
+                $user->email = $auth_user->email;
+                $user->password = Hash::make('password');
+                $user->save();
+
+                $token = $user->createToken('auth_token')->plainTextToken;
+
+                $response['msg'] = "Usuario Guardado Correctamente";
+                $response['token'] = $token;
+                $response['status'] = 1;
+
+                return response()->json($response, 200);
+            } else {
+                $response['msg'] = "Ha Ocurrido un Error";
+                $response['status'] = 0;
+
+                return response()->json($response, 400);
+            }
+        } catch (\Exception $e) {
+            $response['msg'] = (env('APP_DEBUG') == "true" ? $e->getMessage() : $this->error);
+            $response['status'] = 0;
+
+            return response()->json($response, 500);
         }
     }
 }

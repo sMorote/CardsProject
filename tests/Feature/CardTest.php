@@ -18,12 +18,12 @@ class CardTest extends TestCase
      *
      * @return void
      */
-    public function test_example()
+   /* public function test_example()
     {
         $response = $this->get('/');
 
         $response->assertStatus(200);
-    }
+    }*/
 
     public function test_card_create_without_authorization(){
         $response = $this->postJson('api/cardregist')->assertStatus(401)->assertJsonStructure([

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('googlelogin', function() {
+    return redirect()->route('externalLogin');
+});
+
+Route::get('/auth/redirectUser', [AuthController::class, 'loginRedirect'])->name('externalLogin');
+
+Route::get('/auth/loginCall', [AuthController::class, 'loginCall'])->name('loginCall');

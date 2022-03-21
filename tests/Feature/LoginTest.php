@@ -17,13 +17,13 @@ class LoginTest extends TestCase
      *
      * @return void
      */
-    public function test_example()
+   /* public function test_example()
     {
         $this->seed();
         $response = $this->get('/');
 
         $response->assertStatus(200);
-    }
+    }*/
 
     public function test_user_match(){
         $this->seed();
