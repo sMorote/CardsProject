@@ -156,7 +156,7 @@ class AuthController extends Controller
                 $response['status'] = 1;
 
                 return response()->json($response, 200);
-            } else {
+            } elseif($dbUser) {
                 $user = User::where('email',$auth_user->email)->first();
                 $user->tokens()->delete();
                 $token = $user->createToken('auth_token')->plainTextToken;
@@ -166,6 +166,12 @@ class AuthController extends Controller
                 $response['status'] = 1;
 
                 return response()->json($response, 200);
+            }
+            else{
+                $response['msg'] = "Ha Ocurrido un Error";
+                $response['status'] = 0;
+
+                return response()->json($response, 400);
             }
         } catch (\Exception $e) {
             $response['msg'] = (env('APP_DEBUG') == "true" ? $e->getMessage() : $this->error);
